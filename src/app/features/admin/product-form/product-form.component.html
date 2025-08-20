@@ -1,0 +1,96 @@
+<section class="section">
+  <h4 class="mb-3">{{ isEdit ? 'Edit Product' : 'Add Product' }}</h4>
+
+  <div *ngIf="loading" class="text-muted">Loading…</div>
+
+  <form *ngIf="!loading" (ngSubmit)="submitForm()" class="card p-4 bg-white">
+    <div class="row g-3">
+      <div class="col-md-6">
+        <label class="form-label">Name</label>
+        <input class="form-control" [(ngModel)]="form.name" name="name" required>
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label">Category</label>
+        <select class="form-select" [(ngModel)]="form.category" name="category" required>
+          <option value="" disabled>Select a category</option>
+          <option *ngFor="let c of categories" [value]="c._id">{{ c.name }}</option>
+        </select>
+      </div>
+
+      <div class="col-12">
+        <label class="form-label">Short Description</label>
+        <input class="form-control" [(ngModel)]="form.shortDesc" name="shortDesc">
+      </div>
+
+      <div class="col-12">
+        <label class="form-label">Full Description</label>
+        <textarea class="form-control" rows="4" [(ngModel)]="form.description" name="description"></textarea>
+      </div>
+
+      <!-- Specs -->
+      <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <label class="form-label mb-0">Specifications</label>
+          <button type="button" class="btn btn-sm btn-outline-primary" (click)="addSpec()">+ Add Spec</button>
+        </div>
+
+        <div class="row g-2" *ngFor="let s of form.specs; let i = index">
+          <div class="col-md-5">
+            <input class="form-control form-control-sm" placeholder="Key" [(ngModel)]="s.key" name="sk{{i}}">
+          </div>
+          <div class="col-md-6">
+            <input class="form-control form-control-sm" placeholder="Value" [(ngModel)]="s.value" name="sv{{i}}">
+          </div>
+          <div class="col-md-1 d-grid">
+            <button type="button" class="btn btn-sm btn-outline-danger" (click)="removeSpec(i)">×</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Images -->
+      <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <label class="form-label mb-0">Images</label>
+          <div class="d-flex gap-2">
+            <input type="file" class="form-control form-control-sm" accept="image/*" (change)="onPickImage($event)">
+            <button type="button" class="btn btn-sm btn-outline-primary" (click)="addImage()">+ Add Image URL</button>
+          </div>
+        </div>
+
+        <!-- Staged previews -->
+        <div *ngIf="stagedPreviews.length" class="d-flex gap-2 flex-wrap mb-2">
+          <div class="position-relative" *ngFor="let p of stagedPreviews; let i = index">
+            <img [src]="p" class="rounded border img-120x90" alt="staged">
+            <button type="button"
+                    class="btn btn-sm btn-outline-danger position-absolute top-0 end-0"
+                    (click)="removeStaged(i)">×</button>
+          </div>
+        </div>
+
+        <!-- Existing/manual URL rows -->
+        <div class="row g-2" *ngFor="let u of form.images; let i = index">
+          <div class="col-md-11">
+            <input class="form-control form-control-sm" placeholder="https://…" [(ngModel)]="form.images[i]" name="im{{i}}">
+          </div>
+          <div class="col-md-1 d-grid">
+            <button type="button" class="btn btn-sm btn-outline-danger" (click)="removeImage(i)">×</button>
+          </div>
+        </div>
+
+        <!-- Preview of existing/manual URLs -->
+        <div class="d-flex gap-2 flex-wrap mt-2">
+          <img *ngFor="let u of form.images | slice:0:3"
+               [src]="u" class="rounded border img-120x90" alt="preview">
+        </div>
+      </div>
+
+      <div class="col-12">
+        <button class="btn btn-primary" type="submit" [disabled]="saving">
+          <span *ngIf="!saving">{{ isEdit ? 'Update' : 'Create' }}</span>
+          <span *ngIf="saving" class="spinner-border spinner-border-sm"></span>
+        </button>
+      </div>
+    </div>
+  </form>
+</section>
