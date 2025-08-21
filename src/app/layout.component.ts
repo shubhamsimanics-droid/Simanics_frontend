@@ -10,13 +10,17 @@ import { FooterComponent } from './shared/footer/footer.component';
   standalone: true,
   imports: [CommonModule, RouterOutlet, NavbarComponent, FooterComponent],
   template: `
-    <div class="d-flex flex-column min-vh-100">
-      <app-navbar></app-navbar>
-      <main class="container-xxl py-4">
-        <router-outlet></router-outlet>
-      </main>
-      <app-footer></app-footer>
-    </div>
+   <div class="d-flex flex-column min-vh-100">
+  <app-navbar></app-navbar>
+
+  <!-- Main content should expand to push footer down -->
+  <main class="container-xxl py-4 flex-grow-1">
+    <router-outlet></router-outlet>
+  </main>
+
+  <app-footer></app-footer>
+</div>
+
   `
 })
 export class LayoutComponent {}

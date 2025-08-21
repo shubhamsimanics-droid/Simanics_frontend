@@ -4,57 +4,65 @@ import { AdminDashboardComponent } from './features/admin/admin-dashboard/admin-
 import { authGuard } from './core/guard/auth.guard';
 
 export const routes: Routes = [
-      {
-        path: '',
-        loadComponent: () => import('./features/home/home.component').then(m => m.HomeComponent)
-      },
+  {
+    path: '',
+    loadComponent: () => import('./features/home/home.component').then(m => m.HomeComponent)
+  },
+  {
+    path: 'products',
+    loadComponent: () => import('./features/products/product-list/product-list.component').then(m => m.ProductListComponent)
+  },
+  {
+    path: 'product/:id',
+    loadComponent: () => import('./features/products/product-detail/product-detail.component').then(m => m.ProductDetailComponent)
+  },
+  {
+    path: 'contact',
+    loadComponent: () => import('./features/contact/contact.component').then(m => m.ContactComponent)
+  },
+  {
+    path: 'admin/login',
+    loadComponent: () => import('./features/admin/admin-login/admin-login.component').then(m => m.AdminLoginComponent)
+  },
+  {
+    path: 'admin/dashboard',
+    component: AdminDashboardComponent,
+    canActivate: [authGuard],
+    children: [
       {
         path: 'products',
-        loadComponent: () => import('./features/products/product-list/product-list.component').then(m => m.ProductListComponent)
+        loadComponent: () => import('./features/admin/manage-product/manage-product.component').then(m => m.ManageProductsComponent)
       },
       {
-        path: 'product/:id',
-        loadComponent: () => import('./features/products/product-detail/product-detail.component').then(m => m.ProductDetailComponent)
+        path: 'products/add',
+        loadComponent: () => import('./features/admin/product-form/product-form.component').then(m => m.ProductFormComponent)
       },
       {
-        path: 'contact',
-        loadComponent: () => import('./features/contact/contact.component').then(m => m.ContactComponent)
+        path: 'products/edit/:id',
+        loadComponent: () => import('./features/admin/product-form/product-form.component').then(m => m.ProductFormComponent)
       },
       {
-        path: 'admin/login',
-        loadComponent: () => import('./features/admin/admin-login/admin-login.component').then(m => m.AdminLoginComponent)
+        path: 'categories',
+        loadComponent: () => import('./features/admin/manage-categories/manage-categories.component').then(m => m.ManageCategoriesComponent)
       },
       {
-        path: 'admin/dashboard',
-        component: AdminDashboardComponent,
-        canActivate: [authGuard],
-        children: [
-          {
-            path: 'products',
-            loadComponent: () => import('./features/admin/manage-product/manage-product.component').then(m => m.ManageProductsComponent)
-          },
-          {
-            path: 'products/add',
-            loadComponent: () => import('./features/admin/product-form/product-form.component').then(m => m.ProductFormComponent)
-          },
-          {
-            path: 'products/edit/:id',
-            loadComponent: () => import('./features/admin/product-form/product-form.component').then(m => m.ProductFormComponent)
-          },
-          {
-            path: 'categories',
-            loadComponent: () => import('./features/admin/manage-categories/manage-categories.component').then(m => m.ManageCategoriesComponent)
-          },
-          {
-            path: 'enquiries',
-            loadComponent: () => import('./features/admin/view-enquires/view-enquires.component').then(m => m.ViewEnquiriesComponent)
-          },
-
-          {
-            path: '',
-            redirectTo: 'products',
-            pathMatch: 'full'
-          }
-        ]
+        path: 'enquiries',
+        loadComponent: () => import('./features/admin/view-enquires/view-enquires.component').then(m => m.ViewEnquiriesComponent)
+      },
+      {
+        path: '',
+        redirectTo: 'products',
+        pathMatch: 'full'
+      },
+      {
+        path: '**',
+        redirectTo: 'products'
       }
+    ],
+  },
+  {
+    path: '**',
+    redirectTo: '',
+    pathMatch: 'full'
+  }
 ];

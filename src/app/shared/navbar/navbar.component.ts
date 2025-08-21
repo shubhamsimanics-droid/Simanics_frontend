@@ -19,10 +19,17 @@ import { RouterModule } from '@angular/router';
 
     <div id="navMain" class="collapse navbar-collapse">
       <ul class="navbar-nav ms-auto align-items-lg-center">
-        <li class="nav-item"><a class="nav-link px-3" routerLink="/products" routerLinkActive="active">Products</a></li>
-        <li class="nav-item"><a class="nav-link px-3" routerLink="/contact" routerLinkActive="active">Contact</a></li>
-        <li class="nav-item ms-lg-2 mt-2 mt-lg-0">
-          <a class="btn btn-sm btn-primary px-3" routerLink="/admin/login">Admin</a>
+        <li class="nav-item">
+          <a class="nav-link px-3" routerLink="/products" routerLinkActive="active">
+           <i class="fa-solid fa-list mt-2"></i>
+            Products
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link px-3" routerLink="/contact" routerLinkActive="active">
+            <i class="fa-solid fa-address-card mt-2"></i>
+            Contact
+          </a>
         </li>
       </ul>
     </div>
