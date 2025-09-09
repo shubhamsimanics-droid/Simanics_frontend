@@ -236,4 +236,5 @@ export class HomeComponent implements OnInit {
     if (!img) return null;
     return typeof img === 'string' ? img : (img.url || null);
   }
+
 }

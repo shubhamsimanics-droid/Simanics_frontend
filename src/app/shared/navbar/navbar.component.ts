@@ -13,7 +13,7 @@ type Product  = { _id: string; name: string };
   imports: [CommonModule, RouterModule],
   template: `
 <nav class="navbar navbar-expand-lg navbar-dark bg-midnight border-bottom">
-  <div class="container-xxl">
+  <div class="d-flex  p-2 align-items-center">
     <a class="navbar-brand d-flex align-items-center" routerLink="/">
       <img src="SimanicsBrandLogo.png" alt="Simanics" height="40">
     </a>
@@ -79,8 +79,8 @@ type Product  = { _id: string; name: string };
             </ng-template>
           </div>
         </li>
-         <li class="nav-item"><a class="nav-link" routerLink="/contact">
-          <i class="fa-solid fa-address-card me-1"></i>Contact</a></li>
+         <li class="nav-item"><a class="nav-link" routerLink="/contact" style="padding-left:154px">
+          <i class="fa-solid fa-address-card me-1 "></i>Contact</a></li>
       </ul>
     </div>
   </div>

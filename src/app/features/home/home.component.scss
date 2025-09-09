@@ -1,0 +1,134 @@
+/* Method 1: Fixed aspect ratio with object-fit */
+.category-img {
+  height: 200px; /* Fixed height for consistency */
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+}
+
+.category-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Crops to fit container */
+  object-position: center; /* Centers the crop */
+}
+
+/* Alternative: object-fit: contain to show full image */
+.category-img-contain img {
+  object-fit: contain; /* Shows full image, may have letterboxing */
+  background-color: #f8f9fa; /* Background color for letterbox areas */
+}
+
+/* Method 2: CSS aspect-ratio approach (modern browsers) */
+.category-img-aspect {
+  aspect-ratio: 4 / 3; /* 4:3 ratio */
+  width: 100%;
+  overflow: hidden;
+}
+
+.category-img-aspect img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Method 3: Bootstrap aspect ratio utility */
+.ratio-4x3 {
+  position: relative;
+  width: 100%;
+}
+
+.ratio-4x3::before {
+  content: "";
+  display: block;
+  padding-top: 75%; /* 3/4 = 75% for 4:3 ratio */
+}
+
+.ratio-4x3 > img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Card body consistent height */
+.card-body {
+  display: flex;
+  flex-direction: column;
+  min-height: 120px; /* Ensures consistent card body height */
+}
+
+.card-body h3 {
+  margin-bottom: 0.5rem;
+  line-height: 1.3;
+  max-height: 2.6em; /* Limit to 2 lines */
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.card-body p {
+  flex-grow: 1;
+  margin-bottom: 0;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+
+/* Enhanced card consistency */
+.category-card {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  min-height: 320px; /* Total minimum card height */
+}
+
+.category-card .card-body {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/* Responsive adjustments */
+@media (max-width: 576px) {
+  .category-img {
+    height: 160px;
+  }
+
+  .category-card {
+    min-height: 280px;
+  }
+}
+
+@media (min-width: 992px) {
+  .category-img {
+    height: 220px;
+  }
+
+  .category-card {
+    min-height: 360px;
+  }
+}
+
+/* Loading skeleton consistent sizing */
+.skeleton-img {
+  height: 200px;
+  width: 100%;
+}
+
+@media (max-width: 576px) {
+  .skeleton-img {
+    height: 160px;
+  }
+}
+
+@media (min-width: 992px) {
+  .skeleton-img {
+    height: 220px;
+  }
+}

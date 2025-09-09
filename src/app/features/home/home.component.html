@@ -1,1 +1,75 @@
-<p>home works!</p>
+<!-- Categories grid with consistent card sizing -->
+<ng-template #categoriesTpl>
+  <ng-container *ngIf="categories?.length; else emptyTpl">
+    <div class="row g-3">
+      <div class="col-12 col-sm-6 col-lg-3" *ngFor="let c of categories.slice(0, 8); trackBy: trackById">
+        <a class="card category-card h-100 text-decoration-none text-reset shadow-sm lift"
+           [routerLink]="['/products']"
+           [queryParams]="{ category: c._id }">
+
+          <!-- Method 1: Fixed height container -->
+          <div class="category-img card-img-top">
+            <img
+              class="w-100 h-100"
+              [src]="catImg(c) || placeholder"
+              [alt]="c.name"
+              loading="lazy"
+              referrerpolicy="no-referrer" />
+          </div>
+
+          <!-- Alternative Method 2: Bootstrap ratio utility -->
+          <!--
+          <div class="ratio ratio-4x3 card-img-top">
+            <img
+              [src]="catImg(c) || placeholder"
+              [alt]="c.name"
+              loading="lazy"
+              referrerpolicy="no-referrer" />
+          </div>
+          -->
+
+          <!-- Alternative Method 3: CSS aspect-ratio (modern browsers) -->
+          <!--
+          <div class="category-img-aspect card-img-top">
+            <img
+              [src]="catImg(c) || placeholder"
+              [alt]="c.name"
+              loading="lazy"
+              referrerpolicy="no-referrer" />
+          </div>
+          -->
+
+          <div class="card-body">
+            <h3 class="h6 mb-2">{{ c.name }}</h3>
+            <p class="small text-muted">
+              {{ getDescription(c) }}
+            </p>
+          </div>
+        </a>
+      </div>
+    </div>
+  </ng-container>
+
+  <ng-template #emptyTpl>
+    <div class="alert alert-secondary d-flex align-items-center gap-2 mb-0">
+      <span class="rounded-circle bg-secondary-subtle d-inline-block" style="width:8px;height:8px;"></span>
+      No categories yet. <a class="ms-1 text-decoration-none" routerLink="/contact">Contact us</a> for a curated catalogue.
+    </div>
+  </ng-template>
+</ng-template>
+
+<!-- Updated loading skeleton with consistent sizing -->
+<ng-container *ngIf="loading; else categoriesTpl">
+  <div class="row g-3">
+    <div class="col-12 col-sm-6 col-lg-3" *ngFor="let _ of skeleton; index as i">
+      <div class="card category-card h-100 shadow-sm">
+        <div class="skeleton skeleton-img card-img-top"></div>
+        <div class="card-body">
+          <div class="skeleton skeleton-text w-75 mb-2"></div>
+          <div class="skeleton skeleton-text w-100 mb-1"></div>
+          <div class="skeleton skeleton-text w-60"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</ng-container>
