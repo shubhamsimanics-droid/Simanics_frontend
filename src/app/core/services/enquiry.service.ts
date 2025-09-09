@@ -11,8 +11,13 @@ export class EnquiryService {
   getEnquiries() { return this.http.get<Enquiry[]>(this.baseUrl); }
   createEnquiry(payload: Partial<Enquiry>) { return this.http.post<Enquiry>(this.baseUrl, payload); }
 
-  // use only if your backend adds PUT /api/enquiries/:id to update status/isRead
+  // for status/read updates
   updateEnquiry(id: string, payload: Partial<Enquiry>) {
     return this.http.put<Enquiry>(`${this.baseUrl}/${id}`, payload);
+  }
+
+  // for delete
+  deleteEnquiry(id: string) {
+    return this.http.delete<void>(`${this.baseUrl}/${id}`);
   }
 }

@@ -29,27 +29,25 @@ type CategoryVM = {
   <form class="row g-2 align-items-center mb-3" (ngSubmit)="createCategory()">
     <div class="col-md-3">
       <input class="form-control form-control-sm" placeholder="Name"
-             [(ngModel)]="newCat.name" name="name">
+             [(ngModel)]="newCat.name" name="name" autocomplete="off">
     </div>
 
     <div class="col-md-4">
       <input class="form-control form-control-sm" placeholder="Description (optional)"
-             [(ngModel)]="newCat.description" name="desc">
+             [(ngModel)]="newCat.description" name="desc" autocomplete="off">
     </div>
 
-    <!-- Manual URL (optional) -->
     <div class="col-md-3">
       <input class="form-control form-control-sm" placeholder="Image URL (optional)"
-             [(ngModel)]="newCat.imageInput" name="img">
+             [(ngModel)]="newCat.imageInput" name="img" autocomplete="off">
     </div>
 
-    <!-- File picker (staged; upload on Add) -->
-    <div class="col-md-1">
+    <div class="col-8 col-md-1">
       <input class="form-control form-control-sm input-file-sm" type="file" accept="image/*"
              (change)="onPickNewCatImage($event)">
     </div>
 
-    <div class="col-md-1 d-grid">
+    <div class="col-4 col-md-1 d-grid">
       <button class="btn btn-sm btn-primary" type="submit"
               [disabled]="creating || !newCat.name?.trim()">
         <span *ngIf="!creating">Add</span>
@@ -57,7 +55,7 @@ type CategoryVM = {
       </button>
     </div>
 
-    <!-- Staged preview for new category -->
+    <!-- Staged preview -->
     <div class="col-12" *ngIf="newCatPreview">
       <div class="d-inline-block position-relative mt-2">
         <img [src]="newCatPreview" class="rounded border img-120x90" alt="staged">
@@ -69,8 +67,9 @@ type CategoryVM = {
   </form>
 </div>
 
-<div class="table-responsive">
-  <table class="table table-sm table-bordered align-middle mb-0">
+<!-- ===== Desktop/Tablet table (md and up) ===== -->
+<div class="table-responsive d-none d-md-block">
+  <table class="table table-sm table-bordered table-hover align-middle mb-0">
     <thead class="table-light thead-sticky">
       <tr>
         <th class="w-80px">Image</th>
@@ -83,7 +82,7 @@ type CategoryVM = {
     <tbody *ngIf="!loading && categories?.length; else stateTpl">
       <tr *ngFor="let cat of categories; trackBy: trackById">
         <td>
-          <img *ngIf="cat.image?.url" [src]="cat.image?.url" alt="cat"
+          <img *ngIf="cat.image?.url" [src]="cat.image!.url" alt="cat"
                class="rounded border img-64x48">
         </td>
 
@@ -98,14 +97,10 @@ type CategoryVM = {
               <input class="form-control form-control-sm" placeholder="Description"
                      [(ngModel)]="cat.description" name="d{{cat._id}}">
             </div>
-
-            <!-- Manual URL replacement (optional) -->
             <div class="col-12">
               <input class="form-control form-control-sm" placeholder="Image URL (manual)"
                      [(ngModel)]="cat.imageInput" name="i{{cat._id}}">
             </div>
-
-            <!-- Per-row staged file picker -->
             <div class="col-12 d-flex align-items-center gap-2">
               <input class="form-control form-control-sm input-file-sm" type="file" accept="image/*"
                      (change)="onPickRowImage($event, cat._id!)">
@@ -138,16 +133,65 @@ type CategoryVM = {
       </tr>
     </tbody>
   </table>
-
-  <ng-template #stateTpl>
-    <div class="p-3" *ngIf="loading">
-      <span class="text-muted">Loading categories…</span>
-    </div>
-    <div class="alert alert-secondary m-0" *ngIf="!loading && !categories?.length">
-      No categories found.
-    </div>
-  </ng-template>
 </div>
+
+<!-- ===== Mobile cards (under md) ===== -->
+<div class="d-md-none">
+  <ng-container *ngIf="!loading && categories?.length; else stateTpl">
+    <div class="card mb-2" *ngFor="let cat of categories; trackBy: trackById">
+      <div class="card-body">
+        <div class="d-flex align-items-start gap-2 mb-2">
+          <img *ngIf="cat.image?.url" [src]="cat.image!.url" alt="cat" class="rounded border img-64x48">
+          <div class="flex-grow-1">
+            <input class="form-control form-control-sm mb-2"
+                   [(ngModel)]="cat.name" name="mn{{cat._id}}" placeholder="Name">
+            <input class="form-control form-control-sm mb-2"
+                   [(ngModel)]="cat.description" name="md{{cat._id}}" placeholder="Description">
+          </div>
+        </div>
+
+        <input class="form-control form-control-sm mb-2" placeholder="Image URL (manual)"
+               [(ngModel)]="cat.imageInput" name="mi{{cat._id}}">
+
+        <div class="d-flex align-items-center gap-2 mb-2">
+          <input class="form-control form-control-sm input-file-sm" type="file" accept="image/*"
+                 (change)="onPickRowImage($event, cat._id!)">
+          <ng-container *ngIf="rowPreviewMap.get(cat._id!) as rowPrev">
+            <div class="position-relative">
+              <img [src]="rowPrev" class="rounded border img-96x72" alt="staged row">
+              <button type="button" class="btn btn-sm btn-outline-danger position-absolute top-0 end-0"
+                      (click)="removeRowStaged(cat._id!)">×</button>
+            </div>
+          </ng-container>
+        </div>
+
+        <div class="d-flex justify-content-end gap-2">
+          <button class="btn btn-sm btn-outline-primary"
+                  (click)="updateCategory(cat)" [disabled]="savingId===cat._id">
+            <span *ngIf="savingId!==cat._id">Save</span>
+            <span *ngIf="savingId===cat._id" class="spinner-border spinner-border-sm"></span>
+          </button>
+          <button class="btn btn-sm btn-outline-danger"
+                  (click)="deleteCategory(cat._id!)" [disabled]="deletingId===cat._id">
+            <span *ngIf="deletingId!==cat._id">Delete</span>
+            <span *ngIf="deletingId===cat._id" class="spinner-border spinner-border-sm"></span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+</div>
+
+<!-- Shared state template -->
+<ng-template #stateTpl>
+  <div class="p-3" *ngIf="loading">
+    <span class="text-muted">Loading categories…</span>
+  </div>
+  <div class="alert alert-secondary m-0" *ngIf="!loading && !categories?.length">
+    No categories found.
+  </div>
+</ng-template>
+
 
 
   `

@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, ActivatedRoute } from '@angular/router';
 import { map } from 'rxjs/operators';
 import { ProductService } from '../../../core/services/products.service';
+import { CategoryService } from '../../../core/services/category.service';
 
 type Img = string | { url?: string; publicId?: string };
 type Product = {
@@ -25,13 +26,13 @@ type Product = {
     <div class="d-flex align-items-end justify-content-between mb-3">
       <div>
         <h2 class="mb-1">Our Products</h2>
-        <div class="text-muted small" *ngIf="activeCategory">
-          Filtered by category
-          <span class="badge rounded-pill bg-primary-subtle text-primary align-middle ms-1">
-            {{ activeCategory }}
-          </span>
-          <a class="small ms-2 text-decoration-none" [routerLink]="['/products']">Clear</a>
-        </div>
+        <div class="text-muted small" *ngIf="activeCategoryId">
+  Filtered by category
+  <span class="badge rounded-pill bg-primary-subtle text-primary align-middle ms-1">
+    {{ activeCategoryName }}
+  </span>
+</div>
+
       </div>
       <a class="btn btn-outline-secondary btn-sm" [routerLink]="['/contact']">Request a quote</a>
     </div>
@@ -79,7 +80,7 @@ type Product = {
       <ng-template #emptyTpl>
         <div class="alert alert-secondary d-flex align-items-center gap-2 mb-0">
           <span class="rounded-circle bg-secondary-subtle d-inline-block" style="width:8px;height:8px;"></span>
-          No products found<span *ngIf="activeCategory"> for this category</span>.
+          No products found<span *ngIf="activeCategoryName"> for this category</span>.
           <a class="ms-1 text-decoration-none" [routerLink]="['/contact']">Contact us</a> for a curated list.
         </div>
       </ng-template>
@@ -106,26 +107,41 @@ type Product = {
 export class ProductListComponent implements OnInit {
   private productService = inject(ProductService);
   private route = inject(ActivatedRoute);
+  private categoryService = inject(CategoryService);
+
 
   products: Product[] = [];
   loading = true;
-  activeCategory = '';
+  activeCategoryId = '';
+  activeCategoryName = '';
   placeholder = 'assets/placeholder-4x3.png';
   skeleton = Array.from({ length: 9 });
 
   ngOnInit() {
     // react to category filter changes
     this.route.queryParamMap
-      .pipe(map(q => q.get('category') || ''))
-      .subscribe(categoryId => {
-        this.activeCategory = categoryId; // show badge (if you have a name, replace with it)
-        this.loading = true;
-        this.productService.getProducts({ category: categoryId || undefined })
-          .subscribe({
-            next: (data) => { this.products = (data || []) as Product[]; this.loading = false; },
-            error: () => { this.products = []; this.loading = false; }
-          });
+  .pipe(map(q => q.get('category') || ''))
+  .subscribe(categoryId => {
+    this.activeCategoryId = categoryId;
+    this.activeCategoryName = '';
+
+    if (categoryId) {
+      this.categoryService.getCategories().subscribe({
+        next: (cats: any[]) => {
+          const match = cats.find(c => c._id === categoryId || c.id === categoryId);
+          this.activeCategoryName = match?.name || '';
+        }
       });
+    }
+
+    this.loading = true;
+    this.productService.getProducts({ category: categoryId || undefined })
+      .subscribe({
+        next: (data) => { this.products = (data || []) as Product[]; this.loading = false; },
+        error: () => { this.products = []; this.loading = false; }
+      });
+  });
+
   }
 
   trackById = (_: number, x: Product) => x?._id;

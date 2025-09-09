@@ -12,60 +12,38 @@ type Category = { _id: string; name: string; description?: string; image?: Img |
   standalone: true,
   imports: [CommonModule, RouterModule],
   template: `
-    <!-- HERO -->
-    <section class="hero position-relative overflow-hidden">
-      <div class="container position-relative">
-        <div class="row align-items-center py-5 py-xl-6">
-          <div class="col-lg-7 text-center text-lg-start">
-            <span class="badge rounded-pill bg-dark-subtle text-dark fw-semibold mb-3">
-              Hygiene • Healthcare • Facility Care
-            </span>
-            <h1 class="display-5 fw-bold mb-3">Simanics Solutions</h1>
-            <p class="lead text-secondary mb-4">
-              Specialists in hygiene healthcare products—built on quality, trust, and dependable service.
-            </p>
 
-            <div class="d-grid gap-2 d-sm-flex justify-content-sm-center justify-content-lg-start">
-              <a class="btn btn-primary btn-lg px-4" routerLink="/products">Explore Products</a>
-              <a class="btn btn-outline-gold btn-lg px-4" routerLink="/contact">Contact Us</a>
-            </div>
 
-            <!-- Trust badges -->
-            <div class="d-flex flex-wrap gap-3 mt-4 justify-content-center justify-content-lg-start small text-muted">
-              <div class="d-inline-flex align-items-center gap-2">
-                <span class="badge-dot"></span> Pan-India fulfilment
-              </div>
-              <div class="d-inline-flex align-items-center gap-2">
-                <span class="badge-dot"></span> Same-day quotes
-              </div>
-              <div class="d-inline-flex align-items-center gap-2">
-                <span class="badge-dot"></span> Enterprise-grade support
-              </div>
-            </div>
-          </div>
+<!-- HERO SLIDER WITH FIXED HEIGHT -->
+<section class="hero-slider">
+  <div id="heroCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="5000" data-bs-touch="true">
+    <div class="carousel-indicators">
+      <button *ngFor="let _ of heroImages; index as i"
+              type="button"
+              [attr.data-bs-target]="'#heroCarousel'"
+              [attr.data-bs-slide-to]="i"
+              [class.active]="i===0"
+              [attr.aria-current]="i===0 ? 'true' : null"></button>
+    </div>
 
-          <div class="col-lg-5 d-none d-lg-block">
-            <!-- Decorative cards -->
-            <div class="hero-cards">
-              <div class="hero-card shadow-sm bg-white border rounded-4 p-3">
-                <div class="h4 mb-1 fw-semibold">500+</div>
-                <div class="text-muted">Installations</div>
-              </div>
-              <div class="hero-card shadow-sm bg-white border rounded-4 p-3">
-                <div class="h4 mb-1 fw-semibold">50+</div>
-                <div class="text-muted">Product SKUs</div>
-              </div>
-              <div class="hero-card shadow-sm bg-white border rounded-4 p-3">
-                <div class="h4 mb-1 fw-semibold">Same-day</div>
-                <div class="text-muted">Quotes</div>
-              </div>
-            </div>
-          </div>
+    <div class="carousel-inner">
+      <div class="carousel-item" *ngFor="let img of heroImages; index as i" [class.active]="i===0">
+        <div class="hero-image-container">
+          <img [src]="img" class="hero-image" [alt]="'Slide ' + (i+1)">
+          <div class="hero-overlay"></div>
         </div>
       </div>
-      <!-- soft background -->
-      <div class="hero-bg"></div>
-    </section>
+    </div>
+
+    <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev" aria-label="Previous">
+      <span class="carousel-control-prev-icon"></span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next" aria-label="Next">
+      <span class="carousel-control-next-icon"></span>
+    </button>
+  </div>
+</section>
+
 
     <!-- BROWSE BY CATEGORY -->
     <section class="py-5 border-top bg-light-gray">
@@ -98,13 +76,15 @@ type Category = { _id: string; name: string; description?: string; image?: Img |
                 <a class="card h-100 text-decoration-none text-reset shadow-sm lift"
                    [routerLink]="['/products']"
                    [queryParams]="{ category: c._id }">
-                  <div class="ratio ratio-4x3 overflow-hidden bg-body-tertiary">
-                    <img class="w-100 h-100 object-fit-cover"
-                         [src]="catImg(c) || placeholder"
-                         [alt]="c.name"
-                         loading="lazy"
-                         referrerpolicy="no-referrer" />
-                  </div>
+                  <div class="overflow-hidden bg-body-tertiary card-img-top category-img">
+                  <img
+                    class="w-100 h-100 object-fit-cover"
+                    [src]="catImg(c) || placeholder"
+                    [alt]="c.name"
+                    loading="lazy"
+                    referrerpolicy="no-referrer" />
+                </div>
+
 
                   <div class="card-body">
                     <h3 class="h6 mb-1">{{ c.name }}</h3>
@@ -210,6 +190,20 @@ type Category = { _id: string; name: string; description?: string; image?: Img |
 
     /* Optional light gray token */
     .bg-light-gray { background: #f8f9fb; }
+
+.hero-slider {
+  height: auto;
+}
+
+.hero-image {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  display: block;
+}
+
+
+
   `]
 })
 export class HomeComponent implements OnInit {
@@ -219,6 +213,14 @@ export class HomeComponent implements OnInit {
   loading = true;
   placeholder = 'assets/placeholder-4x3.png';
   skeleton = Array.from({ length: 8 });
+
+  heroImages: string[] = [
+  'banner1.jpg', // the “hand-dryer” style banner
+  'banner2.jpg',
+  'banner3.jpg',
+  'banner4.jpg'
+];
+
 
   ngOnInit(): void {
     this.categoriesApi.getCategories().subscribe({

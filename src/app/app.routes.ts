@@ -21,6 +21,10 @@ export const routes: Routes = [
     loadComponent: () => import('./features/contact/contact.component').then(m => m.ContactComponent)
   },
   {
+    path: 'complaint',
+    loadComponent: () => import('./features//complaint/complaint.component').then(m => m.ComplaintComponent)
+  },
+  {
     path: 'admin/login',
     loadComponent: () => import('./features/admin/admin-login/admin-login.component').then(m => m.AdminLoginComponent)
   },

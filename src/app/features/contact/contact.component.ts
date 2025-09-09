@@ -1,9 +1,13 @@
-// pages/contact/contact.component.ts
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, NgForm } from '@angular/forms';
 import { ToasterService } from '../../core/services/toaster.service';
 import { EnquiryService } from '../../core/services/enquiry.service';
+import { CategoryService } from '../../core/services/category.service';
+import { ProductService } from '../../core/services/products.service';
+
+type IdLike = { _id?: string; id?: string };
+const getId = (o: IdLike | null | undefined) => (o && (o._id || o.id)) ?? '';
 
 @Component({
   selector: 'app-contact',
@@ -33,24 +37,14 @@ import { EnquiryService } from '../../core/services/enquiry.service';
             <div class="d-flex flex-column gap-2">
               <a class="text-decoration-none d-inline-flex align-items-center gap-2" href="mailto:contact@simanics.in">
                 <svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentColor" d="M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2Zm0 4-8 5L4 8V6l8 5 8-5Z"/></svg>
-                subham.simanics&#64;gmail.com
+                Simanicsglobal&#64;gmail.com
               </a>
               <a class="text-decoration-none d-inline-flex align-items-center gap-2" href="tel:+918347878904">
                 <svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentColor" d="M6.6 10.8a15.9 15.9 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25c1.1.37 2.3.57 3.6.57a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1C11.3 21 3 12.7 3 2a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.3.2 2.5.57 3.6a1 1 0 0 1-.25 1L6.6 10.8Z"/></svg>
-                +91 83478 78904
+                +91 94264 67608
               </a>
             </div>
           </div>
-        </div>
-
-        <div class="ratio ratio-4x3 rounded-2 border overflow-hidden bg-white mt-4">
-          <iframe
-            src="https://www.google.com/maps/embed?pb=!1m18!..."
-            allowfullscreen
-            loading="lazy"
-            referrerpolicy="no-referrer-when-downgrade"
-            title="Simanics location">
-          </iframe>
         </div>
       </div>
 
@@ -59,6 +53,7 @@ import { EnquiryService } from '../../core/services/enquiry.service';
         <form #form="ngForm" (ngSubmit)="submitForm(form)" class="card border-0 shadow-sm" [attr.aria-busy]="submitting">
           <div class="card-body p-4">
             <div class="row g-3">
+              <!-- Basic details -->
               <div class="col-md-6">
                 <label class="form-label">Your Name</label>
                 <div class="input-icon">
@@ -83,27 +78,59 @@ import { EnquiryService } from '../../core/services/enquiry.service';
               </div>
 
               <div class="col-md-6">
-                <label class="form-label">Phone (optional)</label>
+                <label class="form-label">Phone</label>
                 <div class="input-icon">
-                  <input type="tel" class="form-control" [(ngModel)]="formData.phone" name="phone">
+                  <input type="number" class="form-control" [(ngModel)]="formData.phone" name="phone" required>
                   <span class="icon">
                     <svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentColor" d="M6.6 10.8a15.9 15.9 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25c1.1.37 2.3.57 3.6.57a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1C11.3 21 3 12.7 3 2a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.3.2 2.5.57 3.6a1 1 0 0 1-.25 1L6.6 10.8Z"/></svg>
                   </span>
                 </div>
               </div>
 
+              <!-- Category / Product selection -->
               <div class="col-md-6">
-                <label class="form-label">Topic</label>
-                <select class="form-select" [(ngModel)]="formData.topic" name="topic" required>
-                  <option value="" disabled selected>Choose…</option>
-                  <option>Product enquiry</option>
-                  <option>Bulk pricing</option>
-                  <option>Partnership</option>
-                  <option>Other</option>
+                <label class="form-label">Category</label>
+                <select class="form-select"
+                        name="categoryId"
+                        [(ngModel)]="formData.categoryId"
+                        (ngModelChange)="onCategoryChange($event)"
+                        [disabled]="loading.categories"
+                        required>
+                  <option value="" disabled selected>Choose a category…</option>
+                  <option *ngFor="let c of categories" [value]="getId(c)">{{ c.name }}</option>
                 </select>
-                <div class="invalid small text-danger" *ngIf="form.submitted && form.controls['topic']?.invalid">Please pick a topic.</div>
+                <div class="invalid small text-danger" *ngIf="form.submitted && form.controls['categoryId']?.invalid">
+                  Please select a category.
+                </div>
               </div>
 
+              <div class="col-md-6 d-flex align-items-end">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="chkAllOfCat"
+                         [(ngModel)]="formData.allProductsOfCategory"
+                         name="allProductsOfCategory">
+                  <label for="chkAllOfCat" class="form-check-label">Enquire for the entire category</label>
+                </div>
+              </div>
+
+              <div class="col-12" *ngIf="!formData.allProductsOfCategory">
+                <label class="form-label">Products in selected category</label>
+                <select class="form-select"
+                        name="productIds"
+                        multiple
+                        [(ngModel)]="formData.productIds"
+                        [disabled]="loading.products || !formData.categoryId"
+                        size="6">
+                  <option *ngFor="let p of products" [value]="getId(p)">
+                    {{ p.name }}
+                  </option>
+                </select>
+                <div class="small text-muted mt-1">
+                  Hold Ctrl/⌘ to select multiple. Leave empty to enquire about the category only.
+                </div>
+              </div>
+
+              <!-- Message -->
               <div class="col-12">
                 <label class="form-label">Message</label>
                 <textarea rows="5" class="form-control" [(ngModel)]="formData.message" name="message" required minlength="10"></textarea>
@@ -123,7 +150,7 @@ import { EnquiryService } from '../../core/services/enquiry.service';
                 </div>
               </div>
 
-              <!-- Honeypot (spam trap) -->
+              <!-- Honeypot -->
               <input type="text" name="website" [(ngModel)]="formData.website" class="visually-hidden" tabindex="-1" autocomplete="off">
             </div>
           </div>
@@ -153,17 +180,52 @@ import { EnquiryService } from '../../core/services/enquiry.service';
     .visually-hidden { position: absolute !important; height: 1px; width: 1px; overflow: hidden; clip: rect(1px,1px,1px,1px); white-space: nowrap; }
   `]
 })
-export class ContactComponent {
+export class ContactComponent implements OnInit {
   constructor(
     private toast: ToasterService,
-    private enquiries: EnquiryService
+    private enquiries: EnquiryService,
+    private categoriesApi: CategoryService,
+    private productsApi: ProductService
   ) {}
+
+  loading = { categories: false, products: false };
+  categories: any[] = [];
+  products: any[] = [];
 
   submitting = false;
   formData: {
-    name: string; email: string; message: string; phone?: string;
-    topic?: string; consent?: boolean; website?: string;
-  } = { name: '', email: '', message: '', phone: '', topic: '', consent: false, website: '' };
+    name: string; email: string; message: string;
+    phone?: string; topic?: string; consent?: boolean; website?: string;
+    categoryId?: string; productIds: string[]; allProductsOfCategory: boolean;
+  } = { name: '', email: '', message: '', phone: '', topic: '', consent: false, website: '',
+        categoryId: '', productIds: [], allProductsOfCategory: false };
+
+  ngOnInit() {
+    this.fetchCategories();
+  }
+
+  getId = getId;
+
+  fetchCategories() {
+    this.loading.categories = true;
+    this.categoriesApi.getCategories().subscribe({
+      next: (list: any[]) => { this.categories = list || []; },
+      error: () => this.toast.error?.('Could not load categories.', 'Error'),
+      complete: () => this.loading.categories = false
+    });
+  }
+
+  onCategoryChange(categoryId: string) {
+    this.formData.productIds = [];
+    if (!categoryId) { this.products = []; return; }
+
+    this.loading.products = true;
+    this.productsApi.getProducts({ category: categoryId }).subscribe({
+      next: (list: any[]) => { this.products = list || []; },
+      error: () => this.toast.error?.('Could not load products for this category.', 'Error'),
+      complete: () => this.loading.products = false
+    });
+  }
 
   submitForm(form: NgForm) {
     if (form.invalid) return;
@@ -177,12 +239,18 @@ export class ContactComponent {
 
     this.submitting = true;
 
+    const category = this.categories.find(c => getId(c) === this.formData.categoryId);
     const payload = {
       name: (this.formData.name || '').trim(),
       email: (this.formData.email || '').trim(),
-      phone: (this.formData.phone || '').trim(),
+      phone: (this.formData.phone || ''),
       topic: (this.formData.topic || '').trim(),
-      message: (this.formData.message || '').trim()
+      message: (this.formData.message || '').trim(),
+
+      categoryId: this.formData.categoryId || null,
+      categoryName: category?.name || null,
+      allProductsOfCategory: !!this.formData.allProductsOfCategory,
+      productIds: this.formData.allProductsOfCategory ? [] : (this.formData.productIds || [])
     };
 
     this.enquiries.createEnquiry(payload).subscribe({

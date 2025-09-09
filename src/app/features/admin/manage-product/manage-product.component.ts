@@ -14,12 +14,13 @@ import { ToasterService } from '../../../core/services/toaster.service';
   <a class="btn btn-primary btn-sm" [routerLink]="['/admin/dashboard/products/add']">+ Add New Product</a>
 </div>
 
-<div class="table-responsive">
-  <table class="table table-sm table-bordered align-middle mb-0">
+<!-- ===== Desktop/Tablet table (md and up) ===== -->
+<div class="table-responsive d-none d-md-block">
+  <table class="table table-sm table-bordered table-striped table-hover align-middle mb-0">
     <thead class="table-light thead-sticky">
       <tr>
         <th class="w-80px">Image</th>
-        <th class="w-28 w-22pct">Name</th>
+        <th class="w-22pct">Name</th>
         <th class="w-18pct">Category</th>
         <th>Short Description</th>
         <th class="w-160px">Actions</th>
@@ -29,8 +30,7 @@ import { ToasterService } from '../../../core/services/toaster.service';
     <tbody *ngIf="!loading && products?.length; else stateTpl">
       <tr *ngFor="let p of products; trackBy: trackById">
         <td>
-          <img *ngIf="firstImageUrl(p) as src" [src]="src" alt="thumb"
-               class="rounded border img-64x48">
+          <img *ngIf="firstImageUrl(p) as src" [src]="src" alt="thumb" class="rounded border img-64x48">
         </td>
         <td class="fw-medium">{{ p.name }}</td>
         <td>{{ p.category?.name || '—' }}</td>
@@ -49,18 +49,48 @@ import { ToasterService } from '../../../core/services/toaster.service';
       </tr>
     </tbody>
   </table>
-
-  <ng-template #stateTpl>
-    <div class="p-3" *ngIf="loading">
-      <span class="text-muted">Loading products…</span>
-    </div>
-    <div class="alert alert-secondary m-0" *ngIf="!loading && !products?.length">
-      No products found.
-    </div>
-  </ng-template>
 </div>
 
+<!-- ===== Mobile cards (under md) ===== -->
+<div class="d-md-none">
+  <ng-container *ngIf="!loading && products?.length; else stateTpl">
+    <div class="card mb-2" *ngFor="let p of products; trackBy: trackById">
+      <div class="card-body">
+        <div class="d-flex align-items-start gap-2 mb-2">
+          <img *ngIf="firstImageUrl(p) as src" [src]="src" alt="thumb" class="rounded border img-64x48">
+          <div class="flex-grow-1">
+            <div class="fw-semibold">{{ p.name }}</div>
+            <div class="text-muted small">{{ p.category?.name || '—' }}</div>
+          </div>
+        </div>
 
+        <p class="text-muted small mb-3">
+          {{ p.shortDesc || (p.description?.slice(0, 120) + (p.description?.length > 120 ? '…' : '')) }}
+        </p>
+
+        <div class="d-flex justify-content-end gap-2">
+          <a class="btn btn-sm btn-outline-primary"
+             [routerLink]="['/admin/dashboard/products/edit', p._id]">Edit</a>
+          <button class="btn btn-sm btn-outline-danger"
+                  (click)="deleteProduct(p._id)" [disabled]="deletingId===p._id">
+            <span *ngIf="deletingId!==p._id">Delete</span>
+            <span *ngIf="deletingId===p._id" class="spinner-border spinner-border-sm"></span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+</div>
+
+<!-- Shared state -->
+<ng-template #stateTpl>
+  <div class="p-3" *ngIf="loading">
+    <span class="text-muted">Loading products…</span>
+  </div>
+  <div class="alert alert-secondary m-0" *ngIf="!loading && !products?.length">
+    No products found.
+  </div>
+</ng-template>
   `
 })
 export class ManageProductsComponent implements OnInit {
@@ -81,7 +111,6 @@ export class ManageProductsComponent implements OnInit {
     if (typeof first === 'string') return first;
     if (first && typeof first === 'object' && first.url) return first.url as string;
     return null;
-    // (UI only needs a thumbnail; rest is shown on detail page)
   };
 
   loadProducts() {
